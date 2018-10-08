@@ -215,8 +215,6 @@ private:
         TEST_CASE(cpp11FunctionArgInit); // #7846 - "void foo(int declaration = {}) {"
 
         TEST_CASE(shadowLocal);
-        TEST_CASE(shadowArgument);
-        TEST_CASE(shadowMember);
     }
 
     void check(const char code[], const char *filename = nullptr, bool experimental = false, bool inconclusive = true, bool runSimpleChecks=true, Settings* settings = 0) {
@@ -5343,7 +5341,7 @@ private:
               "    const int a = getA + 3;\n"
               "    return 0;\n"
               "}");
-        ASSERT_EQUALS("[test.cpp:1] -> [test.cpp:4]: (style) Shadow variable: getA\n", errout.str());
+        ASSERT_EQUALS("[test.cpp:1] -> [test.cpp:4]: (style) Local variable getA shadows outer symbol\n", errout.str());
 
         check("class A{public:A(){}};\n"
               "const A& getA(){static A a;return a;}\n"
@@ -7355,11 +7353,11 @@ private:
     void shadowLocal() {
         check("int x;\n"
               "void f() { int x; }\n");
-        ASSERT_EQUALS("[test.cpp:1] -> [test.cpp:2]: (style) Shadow variable: x\n", errout.str());
+        ASSERT_EQUALS("[test.cpp:1] -> [test.cpp:2]: (style) Local variable x shadows outer symbol\n", errout.str());
 
         check("int x();\n"
               "void f() { int x; }\n");
-        ASSERT_EQUALS("[test.cpp:1] -> [test.cpp:2]: (style) Shadow variable: x\n", errout.str());
+        ASSERT_EQUALS("[test.cpp:1] -> [test.cpp:2]: (style) Local variable x shadows outer symbol\n", errout.str());
 
         check("void f() {\n"
               "  if (cond) {int x;}\n" // <- not a shadow variable
@@ -7371,15 +7369,6 @@ private:
               "  int size;\n" // <- not a shadow variable
               "}\n");
         ASSERT_EQUALS("", errout.str());
-    }
-
-    void shadowArgument() {
-        check("int x; void f(int x) {}");
-        //ASSERT_EQUALS("err", errout.str());
-    }
-    void shadowMember() {
-        check("int x; struct ABC { int x; }");
-        //ASSERT_EQUALS("err", errout.str());
     }
 };
 
